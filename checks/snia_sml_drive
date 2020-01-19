@@ -1,0 +1,111 @@
+#!/usr/bin/python
+# -*- encoding: utf-8; py-indent-offset: 4 -*-
+#
+# snia_sml_drive - SNIA Media Access Device check for Checkmk
+#
+# Copyright (C) 2020  Marius Rieder <marius.rieder@scs.ch>
+#
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 2
+# of the License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+#
+# Example excerpt from SNMP data:
+# .1.3.6.1.4.1.14851.3.1.6.2.1.1.1 = INTEGER: 1 --> SNIA-SML-MIB::Index.1
+# .1.3.6.1.4.1.14851.3.1.6.2.1.2.1 = INTEGER: tapeDrive(3) --> SNIA-SML-MIB::mediaAccessDeviceObjectType.1
+# .1.3.6.1.4.1.14851.3.1.6.2.1.3.1 = STRING: "IBM ULT3580-HH8 10WT045208" --> SNIA-SML-MIB::mediaAccessDevice-Name.1
+# .1.3.6.1.4.1.14851.3.1.6.2.1.5.1 = INTEGER: runningFullPower(3) --> SNIA-SML-MIB::mediaAccessDevice-Availability.1
+# .1.3.6.1.4.1.14851.3.1.6.2.1.6.1 = INTEGER: false(2) --> SNIA-SML-MIB::mediaAccessDevice-NeedsCleaning.1
+# .1.3.6.1.4.1.14851.3.1.6.2.1.7.1 = STRING: "33" --> SNIA-SML-MIB::mediaAccessDevice-MountCount.1
+# .1.3.6.1.4.1.14851.3.1.6.2.1.10.1 = STRING: "19" --> SNIA-SML-MIB::mediaAccessDevice-TotalPowerOnHours.1
+# .1.3.6.1.4.1.14851.3.1.6.2.1.11.1 = INTEGER: ok(2) --> SNIA-SML-MIB::mediaAccessDevice-OperationalStatus.1
+
+mediaAccessDeviceObjectType = {
+    1: 'WORM-Drive',
+    2: 'MO-Drive',
+    3: 'Tape-Drive',
+    4: 'DVD-Drive',
+    5: 'CD-Drive',
+}
+
+mediaAccessDeviceOperationalStatus = {
+	0:  (2, 'unknown'),
+	1:  (2, 'other'),
+	2:  (0, 'ok'),
+	3:  (2, 'degraded'),
+	4:  (1, 'stressed'),
+	5:  (1, 'predictiveFailure'),
+	6:  (2, 'error'),
+	7:  (2, 'non-RecoverableError'),
+	8:  (1, 'starting'),
+	9:  (1, 'stopping'),
+	10: (1, 'stopped'),
+	11: (2, 'inService'),
+	12: (2, 'noContact'),
+	13: (2, 'lostCommunication'),
+	14: (2, 'aborted'),
+	15: (2, 'dormant'),
+	16: (2, 'supportingEntityInError'),
+	17: (2, 'completed'),
+	18: (2, 'powerMode'),
+	19: (2, 'dMTFReserved'),
+}
+
+def inventory_snia_sml_drive(info):
+	for drive in info[0]:
+		yield drive[0], {}
+
+def check_snia_sml_drive(item, params, info, timestamp=None):
+    for line in info[0]:
+        if line[0] == item:
+            type = saveint(line[1])
+            status = saveint(line[3])
+            cleaning = saveint(line[4])
+
+            if type in mediaAccessDeviceObjectType:
+                yield 0, "%s: %s" % (mediaAccessDeviceObjectType.get(type), line[2])
+            else:
+                yield 0, line[2]
+
+            if cleaning == 1:
+                yield 1, "Needs cleaning"
+            elif cleaning == 2:
+                yield 0, "Is Clean"
+
+            if timestamp is None:
+                timestamp = time.time()
+
+            perfdata = []
+            for name, counter in [
+                    ("tape_hours", line[6]),
+                    ("tape_loads", line[5])]:
+                perfdata.append((name,
+                    get_rate("check_snia_sml_drive.%s.%s" % (item, name), timestamp, saveint(counter))))
+
+            yield mediaAccessDeviceOperationalStatus[status][0], 'Status: %s' % (mediaAccessDeviceOperationalStatus[status][1]), perfdata
+
+check_info['snia_sml_drive'] = {
+    'inventory_function'    : inventory_snia_sml_drive,
+    'check_function'        : check_snia_sml_drive,
+    'service_description'   : 'Drive %s',
+    'has_perfdata'          : True,
+    'snmp_info'             : [('.1.3.6.1.4.1.14851.3.1.6.2.1', [
+                                    '1',    # SNIA-SML-MIB::mediaAccessDeviceIndex
+                                    '2',    # SNIA-SML-MIB::mediaAccessDeviceObjectType
+                                    '3',    # SNIA-SML-MIB::mediaAccessDevice-Name
+                                    '11',   # SNIA-SML-MIB::mediaAccessDevice-OperationalStatus
+                                    '6',    # SNIA-SML-MIB::mediaAccessDevice-NeedsCleaning
+                                    '7',    # SNIA-SML-MIB::mediaAccessDevice-MountCount
+                                    '10',   # SNIA-SML-MIB::mediaAccessDevice-TotalPowerOnHours
+                               ])],
+    'snmp_scan_function'    : lambda oid: oid(".1.3.6.1.4.1.14851.3.1.1.0"),
+}
