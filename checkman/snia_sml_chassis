@@ -1,0 +1,14 @@
+title: Check SNIA SML Chassis Status
+agents: snmp
+catalog: os/storage
+distribution:
+author: Marius Rieder <marius.rieder@scs.ch>
+license: GPL
+description:
+ This check monitors the status of Chassis via SNIA SML MIB.
+
+item:
+ The chassis name.
+
+inventory:
+ One check per chassis is created for the chassis present in the Sub-Chassis-Table.

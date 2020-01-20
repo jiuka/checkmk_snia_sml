@@ -1,0 +1,19 @@
+{
+    'author': u'Marius Rieder <marius.rieder@scs.ch>',
+    'description': u'This package contains check plugins for SNIA Storage Media Library',
+    'download_url': 'https://github.com/jiuka/checkmk_snia_sml/releases',
+    'files': {
+        'agents': [],
+        'checkman': ['snia_sml_chassis', 'snia_sml_drive'],
+        'checks': ['snia_sml_chassis', 'snia_sml_drive'],
+        'doc': [],
+        'inventory': [],
+        'notifications': [],
+        'pnp-templates': [],
+        'web': []},
+    'name': 'snia_sml',
+    'title': u'Checkmk extension for SNIA Storage Media Library',
+    'version': '0.1',
+    'version.min_required': '1.6.0',
+    'version.packaged': '1.6.0p7'
+}

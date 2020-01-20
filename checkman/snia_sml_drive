@@ -1,0 +1,14 @@
+title: Check SNIA SML Media Access Device
+agents: snmp
+catalog: os/storage
+distribution:
+author: Marius Rieder <marius.rieder@scs.ch>
+license: GPL
+description:
+ This check monitors the status of Media Access Device via SNIA SML MIB.
+
+item:
+ The device index
+
+inventory:
+ One check per device is created for the Media Access Devices present in the Media-Access-Device-Table.
