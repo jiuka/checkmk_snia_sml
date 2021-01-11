@@ -13,7 +13,7 @@
         'web': []},
     'name': 'snia_sml',
     'title': u'Checkmk extension for SNIA Storage Media Library',
-    'version': '1.0',
+    'version': '1.1',
     'version.min_required': '1.6.0',
     'version.packaged': '1.6.0p7'
 }
