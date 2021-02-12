@@ -3,7 +3,7 @@
 #
 # snia_sml_chassis - SINA Chassis check for Checkmk
 #
-# Copyright (C) 2020  Marius Rieder <marius.rieder@scs.ch>
+# Copyright (C) 2021  Marius Rieder <marius.rieder@scs.ch>
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -18,7 +18,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-#
+
 # Example excerpt from SNMP data:
 # .1.3.6.1.4.1.14851.3.1.4.10.1.1.1 = INTEGER: 1 --> SNIA-SML-MIB::subChassisIndex.1
 # .1.3.6.1.4.1.14851.3.1.4.10.1.2.1 = STRING: "IBM" --> SNIA-SML-MIB::subChassis-Manufacturer.1
@@ -48,6 +48,7 @@ from .agent_based_api.v1.type_defs import (
     StringTable,
 )
 
+
 @dataclass
 class SniaSmlChassi:
     tag: Optional[str] = None
@@ -64,16 +65,16 @@ class SniaSmlChassi:
         return self.PACKAGETYPE[self.type]
 
     OPSTATE = {
-        0:  (State.CRIT, 'unknown'),
-        1:  (State.CRIT, 'other'),
-        2:  (State.OK,   'ok'),
-        3:  (State.CRIT, 'degraded'),
-        4:  (State.WARN, 'stressed'),
-        5:  (State.WARN, 'predictiveFailure'),
-        6:  (State.CRIT, 'error'),
-        7:  (State.CRIT, 'non-RecoverableError'),
-        8:  (State.WARN, 'starting'),
-        9:  (State.WARN, 'stopping'),
+        0: (State.CRIT, 'unknown'),
+        1: (State.CRIT, 'other'),
+        2: (State.OK, 'ok'),
+        3: (State.CRIT, 'degraded'),
+        4: (State.WARN, 'stressed'),
+        5: (State.WARN, 'predictiveFailure'),
+        6: (State.CRIT, 'error'),
+        7: (State.CRIT, 'non-RecoverableError'),
+        8: (State.WARN, 'starting'),
+        9: (State.WARN, 'stopping'),
         10: (State.WARN, 'stopped'),
         11: (State.CRIT, 'inService'),
         12: (State.CRIT, 'noContact'),
@@ -87,15 +88,17 @@ class SniaSmlChassi:
     }
 
     PACKAGETYPE = {
-        0:     'Unknown',
-        17:    'Main System Chassis',
-        18:    'Expansion Chassis',
-        19:    'Sub Chassis',
+        0: 'Unknown',
+        17: 'Main System Chassis',
+        18: 'Expansion Chassis',
+        19: 'Sub Chassis',
         32769: 'Service Bay'
     }
 
+
 def parse_snia_sml_chassis(string_table: StringTable) -> List[SniaSmlChassi]:
     return [SniaSmlChassi(tag=entry[0], status=int(entry[1]), type=int(entry[2])) for entry in string_table]
+
 
 register.snmp_section(
     name = "snia_sml_chassis",
@@ -111,9 +114,11 @@ register.snmp_section(
     ),
 )
 
+
 def discovery_snia_sml_chassis(section):
     for chassis in section:
         yield Service(item=chassis.tag)
+
 
 def check_snia_sml_chassis(item, section):
     for chassi in section:
@@ -121,6 +126,7 @@ def check_snia_sml_chassis(item, section):
             yield Result(state=chassi.status_code(), summary='%s has status %s' % (chassi.type_str(), chassi.status_str()))
 
     return Result(state=State.UNKNOWN, summary='Chassis not found')
+
 
 register.check_plugin(
     name="snia_sml_chassis",

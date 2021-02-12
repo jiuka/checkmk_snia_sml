@@ -2,7 +2,7 @@
 #
 # snia_sml_drive - SNIA Media Access Device check for Checkmk
 #
-# Copyright (C) 2020  Marius Rieder <marius.rieder@scs.ch>
+# Copyright (C) 2021  Marius Rieder <marius.rieder@scs.ch>
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -17,15 +17,15 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-#
+
 # Example excerpt from SNMP data:
 # .1.3.6.1.4.1.14851.3.1.6.2.1.1.1 = INTEGER: 1 --> SNIA-SML-MIB::Index.1
 # .1.3.6.1.4.1.14851.3.1.6.2.1.2.1 = INTEGER: tapeDrive(3) --> SNIA-SML-MIB::mediaAccessDeviceObjectType.1
-# .1.3.6.1.4.1.14851.3.1.6.2.1.3.1 = STRING: "IBM ULT3580-HH8 10WT045208" --> SNIA-SML-MIB::mediaAccessDevice-Name.1
+# .1.3.6.1.4.1.14851.3.1.6.2.1.3.1 = STRING: 'IBM ULT3580-HH8 10WT045208' --> SNIA-SML-MIB::mediaAccessDevice-Name.1
 # .1.3.6.1.4.1.14851.3.1.6.2.1.5.1 = INTEGER: runningFullPower(3) --> SNIA-SML-MIB::mediaAccessDevice-Availability.1
 # .1.3.6.1.4.1.14851.3.1.6.2.1.6.1 = INTEGER: false(2) --> SNIA-SML-MIB::mediaAccessDevice-NeedsCleaning.1
-# .1.3.6.1.4.1.14851.3.1.6.2.1.7.1 = STRING: "33" --> SNIA-SML-MIB::mediaAccessDevice-MountCount.1
-# .1.3.6.1.4.1.14851.3.1.6.2.1.10.1 = STRING: "19" --> SNIA-SML-MIB::mediaAccessDevice-TotalPowerOnHours.1
+# .1.3.6.1.4.1.14851.3.1.6.2.1.7.1 = STRING: '33' --> SNIA-SML-MIB::mediaAccessDevice-MountCount.1
+# .1.3.6.1.4.1.14851.3.1.6.2.1.10.1 = STRING: '19' --> SNIA-SML-MIB::mediaAccessDevice-TotalPowerOnHours.1
 # .1.3.6.1.4.1.14851.3.1.6.2.1.11.1 = INTEGER: ok(2) --> SNIA-SML-MIB::mediaAccessDevice-OperationalStatus.1
 
 from dataclasses import dataclass
@@ -40,14 +40,16 @@ from .agent_based_api.v1 import (
     Service,
     Result,
     State,
-    Metrik,
+    Metric,
     get_value_store,
     get_rate,
+    GetRateError,
 )
 
 from .agent_based_api.v1.type_defs import (
     StringTable,
 )
+
 
 @dataclass
 class SniaSmlDrive:
@@ -67,7 +69,7 @@ class SniaSmlDrive:
 
     def desc(self):
         if self.type in self.DEVICETYPE:
-            return "%s: %s" % (self.DEVICETYPE[self.type], self.name)
+            return '%s: %s' % (self.DEVICETYPE[self.type], self.name)
         else:
             return self.name
 
@@ -80,16 +82,16 @@ class SniaSmlDrive:
     }
 
     OPSTATE = {
-        0:  (State.CRIT, 'unknown'),
-        1:  (State.CRIT, 'other'),
-        2:  (State.OK,   'ok'),
-        3:  (State.CRIT, 'degraded'),
-        4:  (State.WARN, 'stressed'),
-        5:  (State.WARN, 'predictiveFailure'),
-        6:  (State.CRIT, 'error'),
-        7:  (State.CRIT, 'non-RecoverableError'),
-        8:  (State.WARN, 'starting'),
-        9:  (State.WARN, 'stopping'),
+        0: (State.CRIT, 'unknown'),
+        1: (State.CRIT, 'other'),
+        2: (State.OK, 'ok'),
+        3: (State.CRIT, 'degraded'),
+        4: (State.WARN, 'stressed'),
+        5: (State.WARN, 'predictiveFailure'),
+        6: (State.CRIT, 'error'),
+        7: (State.CRIT, 'non-RecoverableError'),
+        8: (State.WARN, 'starting'),
+        9: (State.WARN, 'stopping'),
         10: (State.WARN, 'stopped'),
         11: (State.CRIT, 'inService'),
         12: (State.CRIT, 'noContact'),
@@ -102,21 +104,23 @@ class SniaSmlDrive:
         19: (State.CRIT, 'dMTFReserved'),
     }
 
-def parse_snia_sml_drives(string_table: StringTable) -> List[SniaSmlDrive]:
+
+def parse_snia_sml_drive(string_table: StringTable) -> List[SniaSmlDrive]:
     return [SniaSmlDrive(
         index=entry[0],
         type=int(entry[1]),
         name=entry[2],
         status=int(entry[3]),
-        needsCleaning=True if entry[4] == "1" else False,
+        needsCleaning=True if entry[4] == '1' else False,
         mountCount=int(entry[5]),
         powerHours=int(entry[6])
-        ) for entry in string_table]
+    ) for entry in string_table]
+
 
 register.snmp_section(
-    name = "snia_sml_drive",
-    detect = exists(".1.3.6.1.4.1.14851.3.1.1.0"),
-    parse_function=parse_snia_sml_drives,
+    name = 'snia_sml_drive',
+    detect = exists('.1.3.6.1.4.1.14851.3.1.1.0'),
+    parse_function=parse_snia_sml_drive,
     fetch = SNMPTree(
         base = '.1.3.6.1.4.1.14851.3.1.6.2.1',
         oids = [
@@ -131,9 +135,11 @@ register.snmp_section(
     ),
 )
 
+
 def discovery_snia_sml_drive(section):
     for drive in section:
         yield Service(item=drive.index)
+
 
 def check_snia_sml_drive(item, section):
     for drive in section:
@@ -142,26 +148,27 @@ def check_snia_sml_drive(item, section):
             yield Result(state=State.OK, summary=drive.desc())
 
             if drive.needsCleaning:
-                yield Result(state=State.WARN, summary="Needs cleaning")
+                yield Result(state=State.WARN, summary='Needs cleaning')
             else:
-                yield Result(state=State.OK, summary="Is Clean")
+                yield Result(state=State.OK, summary='Is Clean')
 
             yield Result(state=drive.status_code(), summary='Status: %s' % drive.status_str())
 
             value_store = get_value_store()
             for name, counter in [
-                    ("tape_hours", drive.powerHours),
-                    ("tape_loads", drive.mountCount)]:
+                    ('tape_hours', drive.powerHours),
+                    ('tape_loads', drive.mountCount)]:
                 with suppress(GetRateError):
-                    yield Metrik(name, get_rate(
+                    yield Metric(name, get_rate(
                         value_store,
-                        "check_snia_sml_drive.%s.%s" % (item, name),
+                        'check_snia_sml_drive.%s.%s' % (item, name),
                         time.time(),
                         counter))
 
+
 register.check_plugin(
-    name="snia_sml_drive",
-    service_name="Drive %s",
+    name='snia_sml_drive',
+    service_name='Drive %s',
     discovery_function=discovery_snia_sml_drive,
     check_function=check_snia_sml_drive,
 )
