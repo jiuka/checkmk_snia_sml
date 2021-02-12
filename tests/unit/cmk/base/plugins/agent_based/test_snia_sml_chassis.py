@@ -20,25 +20,12 @@
 
 import pytest  # type: ignore[import]
 from cmk.base.plugins.agent_based.agent_based_api.v1 import (
-    Metric,
     Result,
     Service,
     State,
 )
 from cmk.base.plugins.agent_based import snia_sml_chassis
 
-# Example excerpt from SNMP data:
-# .1.3.6.1.4.1.14851.3.1.4.10.1.1.1 = INTEGER: 1 --> SNIA-SML-MIB::subChassisIndex.1
-# .1.3.6.1.4.1.14851.3.1.4.10.1.2.1 = STRING: "IBM" --> SNIA-SML-MIB::subChassis-Manufacturer.1
-# .1.3.6.1.4.1.14851.3.1.4.10.1.3.1 = STRING: "3573-TL" --> SNIA-SML-MIB::subChassis-Model.1
-# .1.3.6.1.4.1.14851.3.1.4.10.1.4.1 = STRING: "3555L3A7800VVF" --> SNIA-SML-MIB::subChassis-SerialNumber.1
-# .1.3.6.1.4.1.14851.3.1.4.10.1.5.1 = INTEGER: false(2) --> SNIA-SML-MIB::subChassis-LockPresent.1
-# .1.3.6.1.4.1.14851.3.1.4.10.1.6.1 = INTEGER: 0 --> SNIA-SML-MIB::subChassis-SecurityBreach.1
-# .1.3.6.1.4.1.14851.3.1.4.10.1.7.1 = INTEGER: false(2) --> SNIA-SML-MIB::subChassis-IsLocked.1
-# .1.3.6.1.4.1.14851.3.1.4.10.1.8.1 = STRING: "IBM 3573-TL 3555L3A7800VVF" --> SNIA-SML-MIB::subChassis-Tag.1
-# .1.3.6.1.4.1.14851.3.1.4.10.1.9.1 = STRING: "3573-TL 3555L3A7800VVF" --> SNIA-SML-MIB::subChassis-ElementName.1
-# .1.3.6.1.4.1.14851.3.1.4.10.1.10.1 = INTEGER: ok(2) --> SNIA-SML-MIB::subChassis-OperationalStatus.1
-# .1.3.6.1.4.1.14851.3.1.4.10.1.11.1 = INTEGER: mainSystemChassis(17) --> SNIA-SML-MIB::subChassis-PackageType.1
 
 @pytest.mark.parametrize('string_table, result', [
     (
