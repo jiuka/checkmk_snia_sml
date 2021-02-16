@@ -27,6 +27,7 @@ from cmk.base.plugins.agent_based.agent_based_api.v1 import (
 from cmk.base.plugins.agent_based import snia_sml_chassis
 
 
+
 @pytest.mark.parametrize('string_table, result', [
     (
         [['IBM TL-3573', '2', '17']],
