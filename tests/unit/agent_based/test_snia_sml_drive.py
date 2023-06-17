@@ -32,6 +32,10 @@ def get_rate(_value_store, _key, _time, value):
     return value
 
 
+def get_value_store():
+    return {}
+
+
 @pytest.mark.parametrize('string_table, result', [
     (
         [['1', '3', 'IBM ULT3580-FH8', '3', '2', '123', '42', '2']],
@@ -135,4 +139,5 @@ def test_discovery_snia_sml_drive(section, result):
 ])
 def test_check_snia_sml_drive(monkeypatch, item, section, result):
     monkeypatch.setattr(snia_sml_drive, 'get_rate', get_rate)
+    monkeypatch.setattr(snia_sml_drive, 'get_value_store', get_value_store)
     assert list(snia_sml_drive.check_snia_sml_drive(item, section)) == result
