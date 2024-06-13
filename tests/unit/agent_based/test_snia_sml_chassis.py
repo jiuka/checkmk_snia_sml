@@ -2,7 +2,7 @@
 #
 # snia_sml_chassis - SNIA Media Access Device check for Checkmk
 #
-# Copyright (C) 2021  Marius Rieder <marius.rieder@scs.ch>
+# Copyright (C) 2021-2024  Marius Rieder <marius.rieder@scs.ch>
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -19,12 +19,12 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 import pytest  # type: ignore[import]
-from cmk.base.plugins.agent_based.agent_based_api.v1 import (
+from cmk.agent_based.v2 import (
     Result,
     Service,
     State,
 )
-from cmk.base.plugins.agent_based import snia_sml_chassis
+from cmk_addons.plugins.snia_sml.agent_based import snia_sml_chassis
 
 
 @pytest.mark.parametrize('string_table, result', [

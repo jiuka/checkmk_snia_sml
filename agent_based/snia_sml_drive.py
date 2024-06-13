@@ -2,7 +2,7 @@
 #
 # snia_sml_drive - SNIA Media Access Device check for Checkmk
 #
-# Copyright (C) 2021  Marius Rieder <marius.rieder@scs.ch>
+# Copyright (C) 2021-2024  Marius Rieder <marius.rieder@scs.ch>
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -33,20 +33,18 @@ from typing import Optional, List
 from contextlib import suppress
 import time
 
-from .agent_based_api.v1 import (
-    register,
+from cmk.agent_based.v2 import (
+    CheckPlugin,
     exists,
-    SNMPTree,
-    Service,
-    Result,
-    State,
-    Metric,
-    get_value_store,
     get_rate,
+    get_value_store,
     GetRateError,
-)
-
-from .agent_based_api.v1.type_defs import (
+    Metric,
+    Result,
+    Service,
+    SimpleSNMPSection,
+    SNMPTree,
+    State,
     StringTable,
 )
 
@@ -116,8 +114,7 @@ def parse_snia_sml_drive(string_table: StringTable) -> List[SniaSmlDrive]:
         powerHours=int(entry[6])
     ) for entry in string_table]
 
-
-register.snmp_section(
+snmp_section_snia_sml_drive = SimpleSNMPSection(
     name = 'snia_sml_drive',
     detect = exists('.1.3.6.1.4.1.14851.3.1.1.0'),
     parse_function=parse_snia_sml_drive,
@@ -166,7 +163,7 @@ def check_snia_sml_drive(item, section):
                         counter))
 
 
-register.check_plugin(
+check_plugin_snia_sml_drive = CheckPlugin(
     name='snia_sml_drive',
     service_name='Drive %s',
     discovery_function=discovery_snia_sml_drive,

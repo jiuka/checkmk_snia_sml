@@ -3,7 +3,7 @@
 #
 # snia_sml_chassis - SINA Chassis check for Checkmk
 #
-# Copyright (C) 2021  Marius Rieder <marius.rieder@scs.ch>
+# Copyright (C) 2021-2024  Marius Rieder <marius.rieder@scs.ch>
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -35,16 +35,14 @@
 from dataclasses import dataclass
 from typing import Optional, List
 
-from .agent_based_api.v1 import (
-    register,
+from cmk.agent_based.v2 import (
+    CheckPlugin,
     exists,
-    SNMPTree,
-    Service,
     Result,
+    Service,
+    SimpleSNMPSection,
+    SNMPTree,
     State,
-)
-
-from .agent_based_api.v1.type_defs import (
     StringTable,
 )
 
@@ -100,9 +98,9 @@ def parse_snia_sml_chassis(string_table: StringTable) -> List[SniaSmlChassi]:
     return [SniaSmlChassi(tag=entry[0], status=int(entry[1]), type=int(entry[2])) for entry in string_table]
 
 
-register.snmp_section(
-    name = "snia_sml_chassis",
-    detect = exists(".1.3.6.1.4.1.14851.3.1.1.0"),
+snmp_section_snia_sml_chassis = SimpleSNMPSection(
+    name = 'snia_sml_chassis',
+    detect = exists('.1.3.6.1.4.1.14851.3.1.1.0'),
     parse_function=parse_snia_sml_chassis,
     fetch = SNMPTree(
         base = '.1.3.6.1.4.1.14851.3.1.4.10.1',
@@ -128,9 +126,9 @@ def check_snia_sml_chassis(item, section):
     return Result(state=State.UNKNOWN, summary='Chassis not found')
 
 
-register.check_plugin(
-    name="snia_sml_chassis",
-    service_name="Chassis %s",
+check_plugin_snia_sml_chassis = CheckPlugin(
+    name='snia_sml_chassis',
+    service_name='Chassis %s',
     discovery_function=discovery_snia_sml_chassis,
     check_function=check_snia_sml_chassis,
 )
