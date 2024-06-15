@@ -30,15 +30,10 @@
 
 from dataclasses import dataclass
 from typing import Optional, List
-from contextlib import suppress
-import time
 
 from cmk.agent_based.v2 import (
     CheckPlugin,
     exists,
-    get_rate,
-    get_value_store,
-    GetRateError,
     Metric,
     Result,
     Service,
@@ -114,6 +109,7 @@ def parse_snia_sml_drive(string_table: StringTable) -> List[SniaSmlDrive]:
         powerHours=int(entry[6])
     ) for entry in string_table]
 
+
 snmp_section_snia_sml_drive = SimpleSNMPSection(
     name = 'snia_sml_drive',
     detect = exists('.1.3.6.1.4.1.14851.3.1.1.0'),
@@ -150,17 +146,8 @@ def check_snia_sml_drive(item, section):
                 yield Result(state=State.OK, summary='Is Clean')
 
             yield Result(state=drive.status_code(), summary='Status: %s' % drive.status_str())
-
-            value_store = get_value_store()
-            for name, counter in [
-                    ('tape_hours', drive.powerHours),
-                    ('tape_loads', drive.mountCount)]:
-                with suppress(GetRateError):
-                    yield Metric(name, get_rate(
-                        value_store,
-                        'check_snia_sml_drive.%s.%s' % (item, name),
-                        time.time(),
-                        counter))
+            yield Metric('tape_hours', drive.powerHours)
+            yield Metric('tape_loads', drive.mountCount)
 
 
 check_plugin_snia_sml_drive = CheckPlugin(
