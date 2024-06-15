@@ -8,11 +8,12 @@
             'snia_sml/agent_based/snia_sml_drive.py',
             'snia_sml/checkman/snia_sml_chassis',
             'snia_sml/checkman/snia_sml_drive',
+            'snia_sml/graphing/snia_sml_drive.py',
         ],
     },
     'name': 'snia_sml',
     'title': u'Checkmk extension for SNIA Storage Media Library',
-    'version': '2.3.0-1',
+    'version': '2.3.0-2',
     'version.min_required': '2.3.0p3',
     'version.packaged': '2.3.0',
     'version.usable_until': '2.4.0'
