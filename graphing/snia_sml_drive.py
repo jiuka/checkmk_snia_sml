@@ -27,7 +27,7 @@ metric_tape_hours = metrics.Metric(
     color=metrics.Color.BLUE,
 )
 
-metric_tape_hours = metrics.Metric(
+metric_tape_loads = metrics.Metric(
     name='tape_loads',
     title=Title('Tape Loads'),
     unit=metrics.Unit(metrics.DecimalNotation('Tape'), metrics.StrictPrecision(0)),
