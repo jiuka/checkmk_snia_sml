@@ -2,7 +2,7 @@
 #
 # snia_sml_drive - SNIA Media Access Device check for Checkmk
 #
-# Copyright (C) 2021  Marius Rieder <marius.rieder@scs.ch>
+# Copyright (C) 2021-2024  Marius Rieder <marius.rieder@scs.ch>
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -19,21 +19,13 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 import pytest  # type: ignore[import]
-from cmk.base.plugins.agent_based.agent_based_api.v1 import (
+from cmk.agent_based.v2 import (
     Metric,
     Result,
     Service,
     State,
 )
-from cmk.base.plugins.agent_based import snia_sml_drive
-
-
-def get_rate(_value_store, _key, _time, value):
-    return value
-
-
-def get_value_store():
-    return {}
+from cmk_addons.plugins.snia_sml.agent_based import snia_sml_drive
 
 
 @pytest.mark.parametrize('string_table, result', [
@@ -137,7 +129,5 @@ def test_discovery_snia_sml_drive(section, result):
         ]
     ),
 ])
-def test_check_snia_sml_drive(monkeypatch, item, section, result):
-    monkeypatch.setattr(snia_sml_drive, 'get_rate', get_rate)
-    monkeypatch.setattr(snia_sml_drive, 'get_value_store', get_value_store)
+def test_check_snia_sml_drive(item, section, result):
     assert list(snia_sml_drive.check_snia_sml_drive(item, section)) == result
