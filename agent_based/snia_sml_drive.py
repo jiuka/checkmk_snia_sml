@@ -112,7 +112,7 @@ def parse_snia_sml_drive(string_table: StringTable) -> List[SniaSmlDrive]:
 
 snmp_section_snia_sml_drive = SimpleSNMPSection(
     name = 'snia_sml_drive',
-    detect = exists('.1.3.6.1.4.1.14851.3.1.1.0'),
+    detect = exists('.1.3.6.1.4.1.14851.3.1.6.2.1.*'),
     parse_function=parse_snia_sml_drive,
     fetch = SNMPTree(
         base = '.1.3.6.1.4.1.14851.3.1.6.2.1',
