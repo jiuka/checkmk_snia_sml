@@ -100,7 +100,7 @@ def parse_snia_sml_chassis(string_table: StringTable) -> List[SniaSmlChassi]:
 
 snmp_section_snia_sml_chassis = SimpleSNMPSection(
     name = 'snia_sml_chassis',
-    detect = exists('.1.3.6.1.4.1.14851.3.1.1.0'),
+    detect = exists('.1.3.6.1.4.1.14851.3.1.4.10.1.*'),
     parse_function=parse_snia_sml_chassis,
     fetch = SNMPTree(
         base = '.1.3.6.1.4.1.14851.3.1.4.10.1',
